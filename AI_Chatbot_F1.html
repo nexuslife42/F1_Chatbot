@@ -121,29 +121,46 @@
         const geminiApiKey = "AIzaSyBcd-RuoNlr31da1haSEDQ53OW8OHh48pI"; // <-- GEMINI API KEY
         let conversationHistory = [];
 
-        // This is the knowledge base extracted from your uploaded documents.
+        // The system prompt that guides the AI's behavior.
+        const systemPrompt = `
+        You are a helpful and friendly AI assistant for participants in an F1 fantasy league. Your role is to answer questions about specific team principals and their remaining picks for drivers and constructors.
+
+        Your knowledge is strictly limited to the information provided in the documents below. Do not use any external knowledge or make up information. If a question cannot be answered from the provided text, you must say, "I'm sorry, but I don't have information on that topic. My knowledge is limited to the provided list of team principals and their remaining picks."
+
+        When answering, be clear and concise. If the user's question is about a specific team principal, focus your answer on that person. Provide a bulleted list for their remaining picks. If the question is general, you may mention or compare multiple team principals if relevant. Start your first message with a friendly greeting.
+        `;
+        
+        // This is the knowledge base by documents.
         const knowledgeBase = `
-                    DOCUMENT 1: Ed Bryant
+        DOCUMENT Teams and Drivers: 
+        ---
+        **Recognized Entities**
+        - **Class A Teams:** Ferrari, Mclaren, Red Bull, Mercedes, Aston Martin  
+        - **Class B Teams:** Alpine, Williams, Racing Bulls, Kick Sauber, Haas  
+        - **Class A Drivers:** Max Verstappen, Liam Lawson, Yuki Tsunoda, Charles Leclerc, Lewis Hamilton, Lando Norris, Oscar Piastri, George Russell, Andrea Kimi Antonelli, Fernando Alonso, Lance Stroll  
+        - **Class B Drivers:** Pierre Gasly, Jack Doohan, Isack Hadjar, Esteban Ocon, Oliver Bearman, Alex Albon, Carlos Sainz Jr., Nico Hulkenberg, Gabriel Bortoleto, Franco Colapinto
+        ---
+        # Status Logic (strict)
+        For each entity’s **Picks Left**:
+        - 🚫 **Locked** --> The driver or team is left off the list per document to signal they have no more picks left
+        - ⚠️ **Approaching** = 1
+        - ✅ **OK** = ≥ 2
+
+ 
+       DOCUMENT 1: Ed Bryant
         ---
         This document provides the remaining picks for Ed Bryant in the F1 fantasy league.
         Picks Remaining:
         - Ferrari: 2
-        - Mclaren: 0
         - Red Bull: 3
         - Mercedes: 8
         - Aston Martin: 9
         - Alpine: 5
-        - Williams: 0
-        - Racing Bulls: 0
         - Kick Sauber: 4
         - Haas: 3
-        - Max Verstappen: 0
         - Liam Lawson: 4
         - Yuki Tsunoda: 6
-        - Charles Leclerc: 0
         - Lewis Hamilton: 2
-        - Lando Norris: 0
-        - Oscar Piastri: 0
         - George Russell: 4
         - Andrea Kimi Antonelli: 7
         - Fernando Alonso: 7
@@ -153,8 +170,6 @@
         - Isack Hadjar: 1
         - Esteban Ocon: 3
         - Oliver Bearman: 4
-        - Alex Albon: 0
-        - Carlos Sainz Jr.: 0
         - Nico Hulkenberg: 1
         - Gabriel Bortoleto: 5
         - Franco Colapinto: 5
@@ -165,33 +180,24 @@
         This document provides the remaining picks for Guy Mouton in the F1 fantasy league.
         Picks Remaining:
         - Ferrari: 2
-        - Mclaren: 0
         - Red Bull: 5
         - Mercedes: 5
         - Aston Martin: 8
         - Alpine: 5
-        - Williams: 0
-        - Racing Bulls: 0
         - Kick Sauber: 2
         - Haas: 3
-        - Max Verstappen: 0
         - Liam Lawson: 5
         - Yuki Tsunoda: 5
         - Charles Leclerc: 1
         - Lewis Hamilton: 4
-        - Lando Norris: 0
-        - Oscar Piastri: 0
         - George Russell: 1
         - Andrea Kimi Antonelli: 8
         - Fernando Alonso: 6
         - Lance Stroll: 8
         - Pierre Gasly: 5
         - Jack Doohan: 5
-        - Isack Hadjar: 0
         - Esteban Ocon: 3
         - Oliver Bearman: 3
-        - Alex Albon: 0
-        - Carlos Sainz Jr.: 0
         - Nico Hulkenberg: 2
         - Gabriel Bortoleto: 2
         - Franco Colapinto: 5
@@ -202,12 +208,9 @@
         This document provides the remaining picks for Jonathan Cummins in the F1 fantasy league.
         Picks Remaining:
         - Ferrari: 6
-        - Mclaren: 0
         - Red Bull: 8
-        - Mercedes: 0
         - Aston Martin: 6
         - Alpine: 2
-        - Williams: 0
         - Racing Bulls: 2
         - Kick Sauber: 3
         - Haas: 3
@@ -216,19 +219,13 @@
         - Yuki Tsunoda: 7
         - Charles Leclerc: 3
         - Lewis Hamilton: 5
-        - Lando Norris: 0
-        - Oscar Piastri: 0
-        - George Russell: 0
         - Andrea Kimi Antonelli: 5
         - Fernando Alonso: 5
         - Lance Stroll: 7
         - Pierre Gasly: 3
         - Jack Doohan: 5
-        - Isack Hadjar: 0
         - Esteban Ocon: 5
         - Oliver Bearman: 5
-        - Alex Albon: 0
-        - Carlos Sainz Jr.: 0
         - Nico Hulkenberg: 3
         - Gabriel Bortoleto: 3
         - Franco Colapinto: 4
@@ -239,33 +236,23 @@
         This document provides the remaining picks for Mark Corley in the F1 fantasy league.
         Picks Remaining:
         - Ferrari: 2
-        - Mclaren: 0
         - Red Bull: 4
         - Mercedes: 5
         - Aston Martin: 9
         - Alpine: 2
-        - Williams: 0
         - Racing Bulls: 2
         - Kick Sauber: 3
         - Haas: 3
-        - Max Verstappen: 0
         - Liam Lawson: 7
         - Yuki Tsunoda: 7
         - Charles Leclerc: 2
         - Lewis Hamilton: 3
-        - Lando Norris: 0
-        - Oscar Piastri: 0
-        - George Russell: 0
         - Andrea Kimi Antonelli: 7
         - Fernando Alonso: 7
         - Lance Stroll: 8
-        - Pierre Gasly: 0
         - Jack Doohan: 5
-        - Isack Hadjar: 0
         - Esteban Ocon: 1
         - Oliver Bearman: 5
-        - Alex Albon: 0
-        - Carlos Sainz Jr.: 0
         - Nico Hulkenberg: 2
         - Gabriel Bortoleto: 5
         - Franco Colapinto: 4
@@ -275,8 +262,6 @@
         ---
         This document provides the remaining picks for Will Stetson in the F1 fantasy league.
         Picks Remaining:
-        - Ferrari: 0
-        - Mclaren: 0
         - Red Bull: 10
         - Mercedes: 10
         - Aston Martin: 10
@@ -284,25 +269,19 @@
         - Williams: 5
         - Racing Bulls: 5
         - Kick Sauber: 5
-        - Haas: 0
         - Max Verstappen: 8
         - Liam Lawson: 8
         - Yuki Tsunoda: 8
         - Charles Leclerc: 8
-        - Lewis Hamilton: 0
-        - Lando Norris: 0
         - Oscar Piastri: 8
-        - George Russell: 0
         - Andrea Kimi Antonelli: 8
         - Fernando Alonso: 8
         - Lance Stroll: 8
-        - Pierre Gasly: 0
         - Jack Doohan: 5
         - Isack Hadjar: 5
         - Esteban Ocon: 5
         - Oliver Bearman: 5
         - Alex Albon: 5
-        - Carlos Sainz Jr.: 0
         - Nico Hulkenberg: 5
         - Gabriel Bortoleto: 5
         - Franco Colapinto: 5
@@ -313,13 +292,11 @@
         This document provides the remaining picks for Phil Root in the F1 fantasy league.
         Picks Remaining:
         - Ferrari: 3
-        - Mclaren: 0
         - Red Bull: 6
         - Mercedes: 2
         - Aston Martin: 9
         - Alpine: 3
         - Williams: 2
-        - Racing Bulls: 0
         - Kick Sauber: 1
         - Haas: 4
         - Max Verstappen: 1
@@ -328,7 +305,6 @@
         - Charles Leclerc: 2
         - Lewis Hamilton: 3
         - Lando Norris: 1
-        - Oscar Piastri: 0
         - George Russell: 3
         - Andrea Kimi Antonelli: 3
         - Fernando Alonso: 8
@@ -338,7 +314,6 @@
         - Isack Hadjar: 1
         - Esteban Ocon: 5
         - Oliver Bearman: 4
-        - Alex Albon: 0
         - Carlos Sainz Jr.: 1
         - Nico Hulkenberg: 1
         - Gabriel Bortoleto: 2
@@ -350,33 +325,23 @@
         This document provides the remaining picks for Mike Merritt in the F1 fantasy league.
         Picks Remaining:
         - Ferrari: 3
-        - Mclaren: 0
         - Red Bull: 6
         - Mercedes: 3
         - Aston Martin: 8
         - Alpine: 3
-        - Williams: 0
-        - Racing Bulls: 0
         - Kick Sauber: 2
         - Haas: 5
-        - Max Verstappen: 0
         - Liam Lawson: 2
         - Yuki Tsunoda: 8
-        - Charles Leclerc: 0
         - Lewis Hamilton: 5
-        - Lando Norris: 0
-        - Oscar Piastri: 0
         - George Russell: 1
         - Andrea Kimi Antonelli: 7
         - Fernando Alonso: 6
         - Lance Stroll: 8
         - Pierre Gasly: 2
         - Jack Doohan: 5
-        - Isack Hadjar: 0
         - Esteban Ocon: 5
         - Oliver Bearman: 3
-        - Alex Albon: 0
-        - Carlos Sainz Jr.: 0
         - Nico Hulkenberg: 3
         - Gabriel Bortoleto: 3
         - Franco Colapinto: 5
@@ -394,14 +359,12 @@
         - Alpine: 3
         - Williams: 1
         - Racing Bulls: 1
-        - Kick Sauber: 0
         - Haas: 5
         - Max Verstappen: 4
         - Liam Lawson: 5
         - Yuki Tsunoda: 4
         - Charles Leclerc: 2
         - Lewis Hamilton: 4
-        - Lando Norris: 0
         - Oscar Piastri: 1
         - George Russell: 3
         - Andrea Kimi Antonelli: 4
@@ -409,11 +372,9 @@
         - Lance Stroll: 8
         - Pierre Gasly: 2
         - Jack Doohan: 5
-        - Isack Hadjar: 0
         - Esteban Ocon: 4
         - Oliver Bearman: 3
         - Alex Albon: 3
-        - Carlos Sainz Jr.: 0
         - Nico Hulkenberg: 1
         - Gabriel Bortoleto: 2
         - Franco Colapinto: 5
@@ -429,17 +390,13 @@
         - Mercedes: 4
         - Aston Martin: 7
         - Alpine: 4
-        - Williams: 0
         - Racing Bulls: 1
         - Kick Sauber: 1
         - Haas: 4
-        - Max Verstappen: 0
         - Liam Lawson: 2
         - Yuki Tsunoda: 7
         - Charles Leclerc: 4
         - Lewis Hamilton: 4
-        - Lando Norris: 0
-        - Oscar Piastri: 0
         - George Russell: 3
         - Andrea Kimi Antonelli: 5
         - Fernando Alonso: 5
@@ -449,7 +406,6 @@
         - Isack Hadjar: 1
         - Esteban Ocon: 4
         - Oliver Bearman: 4
-        - Alex Albon: 0
         - Carlos Sainz Jr.: 1
         - Nico Hulkenberg: 3
         - Gabriel Bortoleto: 2
@@ -461,7 +417,6 @@
         This document provides the remaining picks for Cully in the F1 fantasy league.
         Picks Remaining:
         - Ferrari: 3
-        - Mclaren: 0
         - Red Bull: 3
         - Mercedes: 6
         - Aston Martin: 8
@@ -470,7 +425,6 @@
         - Racing Bulls: 1
         - Kick Sauber: 2
         - Haas: 2
-        - Max Verstappen: 0
         - Liam Lawson: 3
         - Yuki Tsunoda: 7
         - Charles Leclerc: 3
@@ -488,7 +442,6 @@
         - Oliver Bearman: 3
         - Alex Albon: 1
         - Carlos Sainz Jr.: 2
-        - Nico Hulkenberg: 0
         - Gabriel Bortoleto: 2
         - Franco Colapinto: 5
         
@@ -512,16 +465,12 @@
         - Yuki Tsunoda: 6
         - Charles Leclerc: 4
         - Lewis Hamilton: 4
-        - Lando Norris: 0
-        - Oscar Piastri: 0
         - George Russell: 4
         - Andrea Kimi Antonelli: 4
         - Fernando Alonso: 3
         - Lance Stroll: 7
         - Pierre Gasly: 3
         - Jack Doohan: 5
-        - Isack Hadjar: 0
-        - Esteban Ocon: 0
         - Oliver Bearman: 4
         - Alex Albon: 3
         - Carlos Sainz Jr.: 2
@@ -549,18 +498,14 @@
         - Yuki Tsunoda: 8
         - Charles Leclerc: 2
         - Lewis Hamilton: 5
-        - Lando Norris: 0
-        - Oscar Piastri: 0
         - George Russell: 2
         - Andrea Kimi Antonelli: 5
         - Fernando Alonso: 5
         - Lance Stroll: 6
         - Pierre Gasly: 2
         - Jack Doohan: 5
-        - Isack Hadjar: 0
         - Esteban Ocon: 3
         - Oliver Bearman: 4
-        - Alex Albon: 0
         - Carlos Sainz Jr.: 2
         - Nico Hulkenberg: 1
         - Gabriel Bortoleto: 3
@@ -577,11 +522,9 @@
         - Mercedes: 6
         - Aston Martin: 8
         - Alpine: 5
-        - Williams: 0
         - Racing Bulls: 2
         - Kick Sauber: 1
         - Haas: 2
-        - Max Verstappen: 0
         - Liam Lawson: 5
         - Yuki Tsunoda: 8
         - Charles Leclerc: 2
@@ -596,9 +539,7 @@
         - Jack Doohan: 4
         - Isack Hadjar: 4
         - Esteban Ocon: 2
-        - Oliver Bearman: 0
         - Alex Albon: 1
-        - Carlos Sainz Jr.: 0
         - Nico Hulkenberg: 2
         - Gabriel Bortoleto: 3
         - Franco Colapinto: 4
@@ -614,7 +555,6 @@
         - Mercedes: 4
         - Aston Martin: 6
         - Alpine: 3
-        - Williams: 0
         - Racing Bulls: 2
         - Kick Sauber: 3
         - Haas: 2
@@ -633,9 +573,7 @@
         - Jack Doohan: 5
         - Isack Hadjar: 4
         - Esteban Ocon: 3
-        - Oliver Bearman: 0
         - Alex Albon: 1
-        - Carlos Sainz Jr.: 0
         - Nico Hulkenberg: 3
         - Gabriel Bortoleto: 1
         - Franco Colapinto: 4
@@ -651,7 +589,6 @@
         - Mercedes: 4
         - Aston Martin: 6
         - Alpine: 3
-        - Williams: 0
         - Racing Bulls: 1
         - Kick Sauber: 3
         - Haas: 4
@@ -660,8 +597,6 @@
         - Yuki Tsunoda: 4
         - Charles Leclerc: 3
         - Lewis Hamilton: 3
-        - Lando Norris: 0
-        - Oscar Piastri: 0
         - George Russell: 4
         - Andrea Kimi Antonelli: 5
         - Fernando Alonso: 4
@@ -672,7 +607,6 @@
         - Esteban Ocon: 3
         - Oliver Bearman: 2
         - Alex Albon: 1
-        - Carlos Sainz Jr.: 0
         - Nico Hulkenberg: 1
         - Gabriel Bortoleto: 4
         - Franco Colapinto: 5
@@ -688,7 +622,6 @@
         - Mercedes: 5
         - Aston Martin: 6
         - Alpine: 2
-        - Williams: 0
         - Racing Bulls: 2
         - Kick Sauber: 4
         - Haas: 3
@@ -697,7 +630,6 @@
         - Yuki Tsunoda: 7
         - Charles Leclerc: 2
         - Lewis Hamilton: 3
-        - Lando Norris: 0
         - Oscar Piastri: 1
         - George Russell: 3
         - Andrea Kimi Antonelli: 5
@@ -708,8 +640,6 @@
         - Isack Hadjar: 1
         - Esteban Ocon: 3
         - Oliver Bearman: 3
-        - Alex Albon: 0
-        - Carlos Sainz Jr.: 0
         - Nico Hulkenberg: 3
         - Gabriel Bortoleto: 4
         - Franco Colapinto: 5
@@ -725,28 +655,22 @@
         - Mercedes: 4
         - Aston Martin: 8
         - Alpine: 4
-        - Williams: 0
         - Racing Bulls: 2
         - Kick Sauber: 2
         - Haas: 2
-        - Max Verstappen: 0
         - Liam Lawson: 6
         - Yuki Tsunoda: 6
         - Charles Leclerc: 2
         - Lewis Hamilton: 4
         - Lando Norris: 2
-        - Oscar Piastri: 0
         - George Russell: 3
         - Andrea Kimi Antonelli: 5
         - Fernando Alonso: 6
         - Lance Stroll: 6
         - Pierre Gasly: 4
         - Jack Doohan: 5
-        - Isack Hadjar: 0
         - Esteban Ocon: 3
         - Oliver Bearman: 2
-        - Alex Albon: 0
-        - Carlos Sainz Jr.: 0
         - Nico Hulkenberg: 2
         - Gabriel Bortoleto: 2
         - Franco Colapinto: 5
@@ -762,17 +686,12 @@
         - Mercedes: 3
         - Aston Martin: 7
         - Alpine: 3
-        - Williams: 0
-        - Racing Bulls: 0
         - Kick Sauber: 4
         - Haas: 4
-        - Max Verstappen: 0
         - Liam Lawson: 2
         - Yuki Tsunoda: 6
         - Charles Leclerc: 2
         - Lewis Hamilton: 3
-        - Lando Norris: 0
-        - Oscar Piastri: 0
         - George Russell: 3
         - Andrea Kimi Antonelli: 8
         - Fernando Alonso: 5
@@ -803,7 +722,6 @@
         - Racing Bulls: 1
         - Kick Sauber: 2
         - Haas: 1
-        - Max Verstappen: 0
         - Liam Lawson: 5
         - Yuki Tsunoda: 5
         - Charles Leclerc: 1
@@ -814,10 +732,8 @@
         - Andrea Kimi Antonelli: 8
         - Fernando Alonso: 6
         - Lance Stroll: 8
-        - Pierre Gasly: 0
         - Jack Doohan: 5
         - Isack Hadjar: 3
-        - Esteban Ocon: 0
         - Oliver Bearman: 2
         - Alex Albon: 3
         - Carlos Sainz Jr.: 1
@@ -833,10 +749,8 @@
         - Ferrari: 4
         - Mclaren: 2
         - Red Bull: 6
-        - Mercedes: 0
         - Aston Martin: 8
         - Alpine: 4
-        - Williams: 0
         - Racing Bulls: 2
         - Kick Sauber: 3
         - Haas: 1
@@ -846,7 +760,6 @@
         - Charles Leclerc: 2
         - Lewis Hamilton: 2
         - Lando Norris: 1
-        - Oscar Piastri: 0
         - George Russell: 1
         - Andrea Kimi Antonelli: 4
         - Fernando Alonso: 6
@@ -856,8 +769,6 @@
         - Isack Hadjar: 2
         - Esteban Ocon: 1
         - Oliver Bearman: 1
-        - Alex Albon: 0
-        - Carlos Sainz Jr.: 0
         - Nico Hulkenberg: 3
         - Gabriel Bortoleto: 3
         - Franco Colapinto: 5
@@ -877,7 +788,6 @@
         - Racing Bulls: 3
         - Kick Sauber: 3
         - Haas: 2
-        - Max Verstappen: 0
         - Liam Lawson: 7
         - Yuki Tsunoda: 8
         - Charles Leclerc: 3
@@ -888,14 +798,12 @@
         - Andrea Kimi Antonelli: 4
         - Fernando Alonso: 7
         - Lance Stroll: 7
-        - Pierre Gasly: 0
         - Jack Doohan: 5
         - Isack Hadjar: 5
         - Esteban Ocon: 2
         - Oliver Bearman: 1
         - Alex Albon: 1
         - Carlos Sainz Jr.: 1
-        - Nico Hulkenberg: 0
         - Gabriel Bortoleto: 3
         - Franco Colapinto: 5
         
@@ -910,14 +818,12 @@
         - Mercedes: 4
         - Aston Martin: 5
         - Alpine: 4
-        - Williams: 0
         - Racing Bulls: 2
         - Kick Sauber: 1
         - Haas: 3
         - Max Verstappen: 3
         - Liam Lawson: 7
         - Yuki Tsunoda: 4
-        - Charles Leclerc: 0
         - Lewis Hamilton: 2
         - Lando Norris: 4
         - Oscar Piastri: 1
@@ -930,8 +836,6 @@
         - Isack Hadjar: 2
         - Esteban Ocon: 3
         - Oliver Bearman: 3
-        - Alex Albon: 0
-        - Carlos Sainz Jr.: 0
         - Nico Hulkenberg: 1
         - Gabriel Bortoleto: 1
         - Franco Colapinto: 4
@@ -941,7 +845,6 @@
         ---
         This document provides the remaining picks for John Hunter Houser in the F1 fantasy league.
         Picks Remaining:
-        - Ferrari: 0
         - Mclaren: 3
         - Red Bull: 7
         - Mercedes: 2
@@ -950,7 +853,6 @@
         - Williams: 3
         - Racing Bulls: 2
         - Kick Sauber: 2
-        - Haas: 0
         - Max Verstappen: 1
         - Liam Lawson: 5
         - Yuki Tsunoda: 5
@@ -964,8 +866,6 @@
         - Lance Stroll: 5
         - Pierre Gasly: 3
         - Jack Doohan: 5
-        - Isack Hadjar: 0
-        - Esteban Ocon: 0
         - Oliver Bearman: 3
         - Alex Albon: 3
         - Carlos Sainz Jr.: 3
@@ -984,7 +884,6 @@
         - Mercedes: 3
         - Aston Martin: 8
         - Alpine: 4
-        - Williams: 0
         - Racing Bulls: 2
         - Kick Sauber: 3
         - Haas: 1
@@ -993,7 +892,6 @@
         - Yuki Tsunoda: 8
         - Charles Leclerc: 1
         - Lewis Hamilton: 5
-        - Lando Norris: 0
         - Oscar Piastri: 1
         - George Russell: 2
         - Andrea Kimi Antonelli: 5
@@ -1003,10 +901,8 @@
         - Jack Doohan: 5
         - Isack Hadjar: 1
         - Esteban Ocon: 3
-        - Oliver Bearman: 0
         - Alex Albon: 1
         - Carlos Sainz Jr.: 1
-        - Nico Hulkenberg: 0
         - Gabriel Bortoleto: 4
         - Franco Colapinto: 5
         
@@ -1021,11 +917,9 @@
         - Mercedes: 3
         - Aston Martin: 5
         - Alpine: 2
-        - Williams: 0
         - Racing Bulls: 1
         - Kick Sauber: 4
         - Haas: 3
-        - Max Verstappen: 0
         - Liam Lawson: 4
         - Yuki Tsunoda: 7
         - Charles Leclerc: 3
@@ -1041,8 +935,6 @@
         - Isack Hadjar: 2
         - Esteban Ocon: 1
         - Oliver Bearman: 2
-        - Alex Albon: 0
-        - Carlos Sainz Jr.: 0
         - Nico Hulkenberg: 4
         - Gabriel Bortoleto: 4
         - Franco Colapinto: 2
@@ -1058,7 +950,6 @@
         - Mercedes: 10
         - Aston Martin: 10
         - Alpine: 5
-        - Williams: 0
         - Racing Bulls: 5
         - Kick Sauber: 5
         - Haas: 5
@@ -1076,7 +967,6 @@
         - Pierre Gasly: 5
         - Jack Doohan: 5
         - Isack Hadjar: 5
-        - Esteban Ocon: 0
         - Oliver Bearman: 5
         - Alex Albon: 5
         - Carlos Sainz Jr.: 5
@@ -1095,17 +985,14 @@
         - Mercedes: 3
         - Aston Martin: 8
         - Alpine: 3
-        - Williams: 0
         - Racing Bulls: 2
         - Kick Sauber: 2
         - Haas: 2
-        - Max Verstappen: 0
         - Liam Lawson: 5
         - Yuki Tsunoda: 5
         - Charles Leclerc: 1
         - Lewis Hamilton: 4
         - Lando Norris: 1
-        - Oscar Piastri: 0
         - George Russell: 3
         - Andrea Kimi Antonelli: 4
         - Fernando Alonso: 6
@@ -1115,7 +1002,6 @@
         - Isack Hadjar: 1
         - Esteban Ocon: 3
         - Oliver Bearman: 2
-        - Alex Albon: 0
         - Carlos Sainz Jr.: 1
         - Nico Hulkenberg: 2
         - Gabriel Bortoleto: 2
@@ -1132,7 +1018,6 @@
         - Mercedes: 3
         - Aston Martin: 8
         - Alpine: 4
-        - Williams: 0
         - Racing Bulls: 2
         - Kick Sauber: 2
         - Haas: 1
@@ -1141,7 +1026,6 @@
         - Yuki Tsunoda: 8
         - Charles Leclerc: 1
         - Lewis Hamilton: 5
-        - Lando Norris: 0
         - Oscar Piastri: 1
         - George Russell: 2
         - Andrea Kimi Antonelli: 5
@@ -1151,10 +1035,8 @@
         - Jack Doohan: 5
         - Isack Hadjar: 1
         - Esteban Ocon: 3
-        - Oliver Bearman: 0
         - Alex Albon: 1
         - Carlos Sainz Jr.: 1
-        - Nico Hulkenberg: 0
         - Gabriel Bortoleto: 4
         - Franco Colapinto: 5
         
@@ -1169,8 +1051,6 @@
         - Mercedes: 5
         - Aston Martin: 7
         - Alpine: 2
-        - Williams: 0
-        - Racing Bulls: 0
         - Kick Sauber: 3
         - Haas: 3
         - Max Verstappen: 2
@@ -1178,7 +1058,6 @@
         - Yuki Tsunoda: 7
         - Charles Leclerc: 2
         - Lewis Hamilton: 5
-        - Lando Norris: 0
         - Oscar Piastri: 1
         - George Russell: 3
         - Andrea Kimi Antonelli: 6
@@ -1186,11 +1065,9 @@
         - Lance Stroll: 7
         - Pierre Gasly: 3
         - Jack Doohan: 5
-        - Isack Hadjar: 0
         - Esteban Ocon: 4
         - Oliver Bearman: 4
         - Alex Albon: 1
-        - Carlos Sainz Jr.: 0
         - Nico Hulkenberg: 1
         - Gabriel Bortoleto: 2
         - Franco Colapinto: 5
@@ -1206,16 +1083,13 @@
         - Mercedes: 4
         - Aston Martin: 7
         - Alpine: 4
-        - Williams: 0
         - Racing Bulls: 1
         - Kick Sauber: 3
         - Haas: 3
-        - Max Verstappen: 0
         - Liam Lawson: 5
         - Yuki Tsunoda: 6
         - Charles Leclerc: 2
         - Lewis Hamilton: 3
-        - Lando Norris: 0
         - Oscar Piastri: 1
         - George Russell: 3
         - Andrea Kimi Antonelli: 5
@@ -1226,8 +1100,6 @@
         - Isack Hadjar: 2
         - Esteban Ocon: 3
         - Oliver Bearman: 3
-        - Alex Albon: 0
-        - Carlos Sainz Jr.: 0
         - Nico Hulkenberg: 2
         - Gabriel Bortoleto: 3
         - Franco Colapinto: 5
@@ -1243,7 +1115,6 @@
         - Mercedes: 4
         - Aston Martin: 7
         - Alpine: 4
-        - Williams: 0
         - Racing Bulls: 1
         - Kick Sauber: 3
         - Haas: 3
@@ -1252,7 +1123,6 @@
         - Yuki Tsunoda: 6
         - Charles Leclerc: 2
         - Lewis Hamilton: 3
-        - Lando Norris: 0
         - Oscar Piastri: 1
         - George Russell: 3
         - Andrea Kimi Antonelli: 5
@@ -1280,17 +1150,14 @@
         - Mercedes: 5
         - Aston Martin: 7
         - Alpine: 3
-        - Williams: 0
         - Racing Bulls: 2
         - Kick Sauber: 3
         - Haas: 2
-        - Max Verstappen: 0
         - Liam Lawson: 5
         - Yuki Tsunoda: 7
         - Charles Leclerc: 2
         - Lewis Hamilton: 3
         - Lando Norris: 1
-        - Oscar Piastri: 0
         - George Russell: 3
         - Andrea Kimi Antonelli: 5
         - Fernando Alonso: 5
@@ -1301,7 +1168,6 @@
         - Esteban Ocon: 3
         - Oliver Bearman: 2
         - Alex Albon: 1
-        - Carlos Sainz Jr.: 0
         - Nico Hulkenberg: 2
         - Gabriel Bortoleto: 2
         - Franco Colapinto: 5
@@ -1317,7 +1183,6 @@
         - Mercedes: 3
         - Aston Martin: 8
         - Alpine: 4
-        - Williams: 0
         - Racing Bulls: 2
         - Kick Sauber: 3
         - Haas: 1
@@ -1326,7 +1191,6 @@
         - Yuki Tsunoda: 8
         - Charles Leclerc: 1
         - Lewis Hamilton: 5
-        - Lando Norris: 0
         - Oscar Piastri: 1
         - George Russell: 2
         - Andrea Kimi Antonelli: 5
@@ -1336,10 +1200,8 @@
         - Jack Doohan: 5
         - Isack Hadjar: 1
         - Esteban Ocon: 3
-        - Oliver Bearman: 0
         - Alex Albon: 1
         - Carlos Sainz Jr.: 1
-        - Nico Hulkenberg: 0
         - Gabriel Bortoleto: 4
         - Franco Colapinto: 5
         
@@ -1354,7 +1216,6 @@
         - Mercedes: 5
         - Aston Martin: 8
         - Alpine: 3
-        - Williams: 0
         - Racing Bulls: 2
         - Kick Sauber: 2
         - Haas: 2
@@ -1364,7 +1225,6 @@
         - Charles Leclerc: 2
         - Lewis Hamilton: 3
         - Lando Norris: 1
-        - Oscar Piastri: 0
         - George Russell: 3
         - Andrea Kimi Antonelli: 5
         - Fernando Alonso: 6
@@ -1375,7 +1235,6 @@
         - Esteban Ocon: 2
         - Oliver Bearman: 2
         - Alex Albon: 1
-        - Carlos Sainz Jr.: 0
         - Nico Hulkenberg: 2
         - Gabriel Bortoleto: 2
         - Franco Colapinto: 5
@@ -1391,7 +1250,6 @@
         - Mercedes: 4
         - Aston Martin: 7
         - Alpine: 2
-        - Williams: 0
         - Racing Bulls: 2
         - Kick Sauber: 3
         - Haas: 2
@@ -1401,7 +1259,6 @@
         - Charles Leclerc: 3
         - Lewis Hamilton: 3
         - Lando Norris: 1
-        - Oscar Piastri: 0
         - George Russell: 3
         - Andrea Kimi Antonelli: 6
         - Fernando Alonso: 5
@@ -1411,8 +1268,6 @@
         - Isack Hadjar: 1
         - Esteban Ocon: 3
         - Oliver Bearman: 3
-        - Alex Albon: 0
-        - Carlos Sainz Jr.: 0
         - Nico Hulkenberg: 2
         - Gabriel Bortoleto: 2
         - Franco Colapinto: 5
@@ -1428,17 +1283,14 @@
         - Mercedes: 4
         - Aston Martin: 8
         - Alpine: 3
-        - Williams: 0
         - Racing Bulls: 2
         - Kick Sauber: 2
         - Haas: 3
-        - Max Verstappen: 0
         - Liam Lawson: 6
         - Yuki Tsunoda: 6
         - Charles Leclerc: 2
         - Lewis Hamilton: 3
         - Lando Norris: 1
-        - Oscar Piastri: 0
         - George Russell: 3
         - Andrea Kimi Antonelli: 5
         - Fernando Alonso: 6
@@ -1449,20 +1301,10 @@
         - Esteban Ocon: 2
         - Oliver Bearman: 2
         - Alex Albon: 1
-        - Carlos Sainz Jr.: 0
         - Nico Hulkenberg: 2
         - Gabriel Bortoleto: 2
         - Franco Colapinto: 5
 
-        `;
-
-        // The system prompt that guides the AI's behavior.
-        const systemPrompt = `
-        You are a helpful and friendly AI assistant for participants in an F1 fantasy league. Your role is to answer questions about specific team principals and their remaining picks for drivers and constructors.
-
-        Your knowledge is strictly limited to the information provided in the documents below. Do not use any external knowledge or make up information. If a question cannot be answered from the provided text, you must say, "I'm sorry, but I don't have information on that topic. My knowledge is limited to the provided list of team principals and their remaining picks."
-
-        When answering, be clear and concise. If the user's question is about a specific team principal, focus your answer on that person. Provide a bulleted list for their remaining picks. If the question is general, you may mention or compare multiple team principals if relevant. Start your first message with a friendly greeting.
         `;
 
         // Function to start the chat application
